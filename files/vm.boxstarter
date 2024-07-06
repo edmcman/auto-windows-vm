@@ -17,13 +17,16 @@ choco install visualstudio2022community --package-parameters "--add Microsoft.Vi
 # Browsers
 
 choco install googlechrome
-
 choco install foxitreader
 
 # Utilities
 
 choco install windirstat
 choco install sysinternals
+
+# Productivity
+
+choco install office365business --forcex86 --params "'/productid:O365HomePremRetail /exclude:Access Groove Lync OneDrive OneNote Outlook Publisher /language:en-US /eula:FALSE'"
 
 # Updates
 
