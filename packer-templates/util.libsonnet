@@ -21,6 +21,8 @@
 
       vmx_data: vmx_data,
 
+      shutdown_command: "shutdown -P now",
+
       iso_url: iso_url,
       iso_checksum: iso_checksum,
       communicator: 'winrm',
