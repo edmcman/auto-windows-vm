@@ -9,7 +9,7 @@
       iso_checksum: "026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078"
     }
   },
-  makevm: function(guest_os_type, iso_url, iso_checksum, winrm_username, winrm_password, vmx_data={}, disk_adapter_type='nvme', memory=5120, cpus=2, version=21) {
+  makevm: function(guest_os_type, iso_url, iso_checksum, winrm_username='ed', winrm_password='password', vmx_data={}, disk_adapter_type='nvme', memory=5120, cpus=2, version=21) {
     builders: [{
       type: 'vmware-iso',
       memory: memory,

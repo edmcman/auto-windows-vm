@@ -26,7 +26,8 @@ choco install sysinternals
 
 # Productivity
 
-choco install office365business --forcex86 --params "'/productid:O365HomePremRetail /exclude:Access Groove Lync OneDrive OneNote Outlook Publisher /language:en-US /eula:FALSE'"
+# Didn't work?
+#choco install office365business --params "'/exclude:Access Groove Lync OneDrive OneNote Outlook Publisher /language:en-US /eula:FALSE'"
 
 # Updates
 
@@ -55,6 +56,11 @@ try {
 catch {
   $global:error.RemoveAt(0)
 }
+
+# ejs: This seems to be needed now...
+# https://www.hurryupandwait.io/blog/fixing-winrm-firewall-exception-rule-not-working-when-internet-connection-type-is-set-to-public
+Set-NetConnectionProfile -NetworkCategory Private
+
 Enable-PSRemoting @enableArgs
 Enable-WSManCredSSP -Force -Role Server
 winrm set winrm/config/client/auth '@{Basic="true"}'
