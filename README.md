@@ -12,3 +12,4 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 
 * Support for other builders besides `vmware-iso`
 * Windows 11 support
+* Don't require user to press key to boot from CD
