@@ -7,3 +7,8 @@ configure the system.
 Fish: `packer build (jsonnet packer-templates/win10.jsonnet | psub)`
 
 Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
+
+# Todo
+
+* Support for other builders besides `vmware-iso`
+* Windows 11 support
