@@ -19,6 +19,9 @@
 
       version: version,
 
+      boot_wait: "1s",
+      boot_command: "<spacebar>",
+
       vmx_data: vmx_data,
 
       shutdown_command: "shutdown -P now",
