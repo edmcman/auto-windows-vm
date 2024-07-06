@@ -1,5 +1,5 @@
 Set-StartScreenOptions -EnableBootToDesktop
-Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar -EnableOpenFileExplorerToQuickAccess -EnableShowRecentFilesInQuickAccess -EnableShowFrequentFoldersInQuickAccess -EnableExpandToOpenFolder -EnableShowRibbon -EnableItemCheckBox
+Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar -EnableOpenFileExplorerToQuickAccess -EnableShowRecentFilesInQuickAccess -EnableShowFrequentFoldersInQuickAccess -EnableExpandToOpenFolder -EnableShowRibbon
 
 Enable-MicrosoftUpdate
 
@@ -19,6 +19,9 @@ choco install visualstudio2022community --package-parameters "--add Microsoft.Vi
 
 choco install googlechrome
 
+choco install foxitreader
+
 # Utilities
 
 choco install windirstat
+choco install sysinternals
