@@ -30,7 +30,7 @@
       winrm_timeout: '24h',
       floppy_files: [
         'files/autounattend.xml',
-        'scripts/boxstarter.ps1',
+        'scripts/install-boxstarter.ps1',
         'files/vm.boxstarter',
       ],
     }],

@@ -209,13 +209,11 @@ Notes: Enter your comments here...
                     <CommandLine>cmd /C wmic useraccount where name="ed" set PasswordExpires=false</CommandLine>
                     <Description>Password Never Expires</Description>
                 </SynchronousCommand>
-                <!--
                 <SynchronousCommand wcm:action="add">
                     <Description>Run Boxstarter</Description>
                     <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File a:\install-boxstarter.ps1</CommandLine>
                     <Order>4</Order>
                 </SynchronousCommand>
-                -->
             </FirstLogonCommands>
             <TimeZone>Eastern Standard Time</TimeZone>
         </component>
