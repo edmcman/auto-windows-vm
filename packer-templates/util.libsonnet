@@ -29,7 +29,7 @@
       headless: 'false',
       winrm_username: winrm_username,
       winrm_password: winrm_password,
-      winrm_timeout: '24h',
+      winrm_timeout: '12h',
       floppy_files: [
         'files/autounattend.xml',
         'scripts/install-boxstarter.ps1',
