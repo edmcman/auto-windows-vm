@@ -47,11 +47,12 @@
         'files/vm.boxstarter',
       ],
     }],
+    provisioners: [
+      {
+        type: 'powershell',
+        scripts: ['scripts/disable-winrm.ps1', 'scripts/cleanup.ps1'],
+      },
+    ],
   },
-  provisioners: [
-    {
-      type: 'powershell',
-      scripts: ['scripts/disable-winrm.ps1', 'scripts/cleanup.ps1'],
-    },
-  ],
+
 }
