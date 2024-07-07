@@ -10,7 +10,6 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 
 # Todo
 
-* Support for other builders besides `vmware-iso`
-* Windows 11 support
-* Automatically modify autounattend.xml as needed
-* Turn off winrm after provisioning
+* Support for virtualbox
+* Automatically modify autounattend.xml as needed to call boxstarter, add TPM bypass
+* Turn off winrm after provisioning https://4sysops.com/archives/disable-powershell-remoting-disable-psremoting-winrm-listener-firewall-and-localaccounttokenfilterpolicy/
