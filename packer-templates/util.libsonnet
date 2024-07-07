@@ -19,6 +19,7 @@
 
       snapshot_name: "clean-install",
 
+      output_directory: "output-vmware-" + vm_name,
       vm_name: vm_name,
 
       version: version,
