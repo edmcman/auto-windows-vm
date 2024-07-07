@@ -24,7 +24,7 @@
 
       vmx_data: vmx_data,
 
-      shutdown_command: "shutdown -P now",
+      shutdown_command: "shutdown /p",
 
       iso_url: iso_url,
       iso_checksum: iso_checksum,
@@ -32,6 +32,9 @@
       headless: 'false',
       winrm_username: winrm_username,
       winrm_password: winrm_password,
+      winrm_insecure: 'true',
+      winrm_use_ssl: 'false',
+
       winrm_timeout: '12h',
       floppy_files: [
         'files/autounattend.xml',

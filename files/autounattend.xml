@@ -177,7 +177,7 @@ Notes: Enter your comments here...
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Password>
-                            <Value></Value>
+                            <Value>password</Value>
                             <PlainText>true</PlainText>
                         </Password>
                         <Description></Description>
