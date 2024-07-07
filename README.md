@@ -13,3 +13,4 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 * Support for other builders besides `vmware-iso`
 * Windows 11 support
 * Automatically modify autounattend.xml as needed
+* Turn off winrm after provisioning
