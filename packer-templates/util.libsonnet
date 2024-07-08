@@ -33,7 +33,7 @@
       winrm_password: winrm_password,
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
-      winrm_timeout: '12h',
+      winrm_timeout: '2h',
       floppy_files: [
         'files/autounattend.xml',
         'files/vm.boxstarter',
