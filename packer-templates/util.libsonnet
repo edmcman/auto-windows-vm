@@ -50,7 +50,7 @@
     provisioners: [
       {
         type: 'powershell',
-        scripts: ['scripts/disable-winrm.ps1', 'scripts/cleanup.ps1'],
+        scripts: ['scripts/cleanup.ps1', 'scripts/disable-winrm.ps1'],
       },
     ],
   },
