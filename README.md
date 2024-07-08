@@ -11,8 +11,7 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 # Configuration
 
 You can adjust the settings and software installed by modifying the
-[files/vm.boxstarter](files/vm.boxstarter) file and the helper scripts that it
-invokes [scripts/install-packages.ps1](scripts/install-packages.ps1).
+[files/vm.boxstarter](files/vm.boxstarter) file.
 
 # Testing
 

@@ -1,28 +1,60 @@
-# Settings
+Function Install-Packages {
+    # VM
 
-Set-StartScreenOptions -EnableBootToDesktop
-Set-WindowsExplorerOptions `
-    -EnableShowHiddenFilesFoldersDrives `
-    -EnableShowProtectedOSFiles `
-    -EnableShowFileExtensions `
-    -EnableShowFullPathInTitleBar `
-    -EnableOpenFileExplorerToQuickAccess `
-    -EnableShowRecentFilesInQuickAccess `
-    -EnableShowFrequentFoldersInQuickAccess `
-    -EnableExpandToOpenFolder `
-    -EnableShowRibbon
+    choco install vmware-tools
 
-# Move start button to the bottom left
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value 0
+    # Development
 
-# Set system theme to dark
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0
+    choco install vscode
+    choco install git
+    choco install cmake
 
-# Set app theme to dark
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0
+    # visual studio 2022 with c++
+    choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
 
-# Install packages
-a:\install-packages.ps1
+    # Browsers
+
+    choco install googlechrome
+    choco install foxitreader
+
+    # Utilities
+
+    choco install windirstat
+    choco install sysinternals
+
+    # Productivity
+
+    # Didn't work?
+    #choco install office365business --params "'/exclude:Access Groove Lync OneDrive OneNote Outlook Publisher /language:en-US /eula:FALSE'"
+}
+
+Function Apply-Settings {
+
+    Set-StartScreenOptions -EnableBootToDesktop
+    Set-WindowsExplorerOptions `
+        -EnableShowHiddenFilesFoldersDrives `
+        -EnableShowProtectedOSFiles `
+        -EnableShowFileExtensions `
+        -EnableShowFullPathInTitleBar `
+        -EnableOpenFileExplorerToQuickAccess `
+        -EnableShowRecentFilesInQuickAccess `
+        -EnableShowFrequentFoldersInQuickAccess `
+        -EnableExpandToOpenFolder `
+        -EnableShowRibbon
+
+    # Move start button to the bottom left
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value 0
+
+    # Set system theme to dark
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0
+
+    # Set app theme to dark
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0
+}
+
+Apply-Settings
+
+Install-Packages
 
 # Updates
 

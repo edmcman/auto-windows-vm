@@ -39,7 +39,6 @@
         'files/vm.boxstarter',
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
         'scripts/install-boxstarter.ps1',
-        'scripts/install-packages.ps1',  // called by vm.boxstarter
       ],
     };
 
