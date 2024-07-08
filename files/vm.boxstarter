@@ -1,41 +1,36 @@
+# Settings
+
 Set-StartScreenOptions -EnableBootToDesktop
-Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar -EnableOpenFileExplorerToQuickAccess -EnableShowRecentFilesInQuickAccess -EnableShowFrequentFoldersInQuickAccess -EnableExpandToOpenFolder -EnableShowRibbon
+Set-WindowsExplorerOptions `
+    -EnableShowHiddenFilesFoldersDrives `
+    -EnableShowProtectedOSFiles `
+    -EnableShowFileExtensions `
+    -EnableShowFullPathInTitleBar `
+    -EnableOpenFileExplorerToQuickAccess `
+    -EnableShowRecentFilesInQuickAccess `
+    -EnableShowFrequentFoldersInQuickAccess `
+    -EnableExpandToOpenFolder `
+    -EnableShowRibbon
 
-# VM
+# Move start button to the bottom left
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value 0
 
-choco install vmware-tools
+# Set system theme to dark
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0
 
-# Development
+# Set app theme to dark
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0
 
-choco install vscode
-choco install git
-choco install cmake
-
-# visual studio 2022 with c++
-choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
-
-# Browsers
-
-choco install googlechrome
-choco install foxitreader
-
-# Utilities
-
-choco install windirstat
-choco install sysinternals
-
-# Productivity
-
-# Didn't work?
-#choco install office365business --params "'/exclude:Access Groove Lync OneDrive OneNote Outlook Publisher /language:en-US /eula:FALSE'"
+# Install packages
+a:\install-packages.ps1
 
 # Updates
 
 Enable-MicrosoftUpdate
 Install-WindowsUpdate -Full
 
-# Source: https://github.com/mwrock/packer-templates/blob/master/scripts/package.ps1
 # Remove page file
+# Source: https://github.com/mwrock/packer-templates/blob/master/scripts/package.ps1
 
 Write-BoxstarterMessage "Removing page file"
 $pageFileMemoryKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
@@ -43,26 +38,5 @@ Set-ItemProperty -Path $pageFileMemoryKey -Name PagingFiles -Value ""
 
 if (Test-PendingReboot) { Invoke-Reboot }
 
-Write-BoxstarterMessage "Setting up winrm"
-
-$enableArgs=@{Force=$true}
-try {
- $command=Get-Command Enable-PSRemoting
-  if($command.Parameters.Keys -contains "skipnetworkprofilecheck"){
-      $enableArgs.skipnetworkprofilecheck=$true
-  }
-}
-catch {
-  $global:error.RemoveAt(0)
-}
-
-# ejs: This seems to be needed now...
-# https://www.hurryupandwait.io/blog/fixing-winrm-firewall-exception-rule-not-working-when-internet-connection-type-is-set-to-public
-Set-NetConnectionProfile -NetworkCategory Private
-
-Enable-PSRemoting @enableArgs
-Enable-WSManCredSSP -Force -Role Server
-winrm set winrm/config/client/auth '@{Basic="true"}'
-winrm set winrm/config/service/auth '@{Basic="true"}'
-winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-Write-BoxstarterMessage "winrm setup complete"
+# Enable WinRM to conclude packer provisioning process
+a:\enable-winrm.ps1

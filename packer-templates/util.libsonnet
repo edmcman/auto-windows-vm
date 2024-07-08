@@ -9,50 +9,64 @@
       iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
     },
   },
-  makevm: function(guest_os_type, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_adapter_type='nvme', memory=5120, cpus=2, version=21) {
-    builders: [{
-      type: 'vmware-iso',
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, memory=5120, cpus=2, vmware_version=21)
+    local common = {
       memory: memory,
       cpus: cpus,
-      guest_os_type: guest_os_type,
-      disk_adapter_type: disk_adapter_type,
-
-      snapshot_name: 'clean-install',
-
-      output_directory: 'output-vmware-' + vm_name,
       vm_name: vm_name,
-
-      version: version,
 
       boot_wait: '1s',
       boot_command: '<spacebar>',
 
-      vmx_data: vmx_data,
-
-      shutdown_command: 'shutdown /p',
-
       iso_url: iso_url,
       iso_checksum: iso_checksum,
+
+      // Because of limitations in the vmware-iso builder, disabling WinRM must
+      // happen in the shutdown command.  Otherwise the builder will attempt (and
+      // fail) to run the shutdown command which will fail because WinRM is turned
+      // off.
+      shutdown_command: 'powershell -executionpolicy bypass -file C:/windows/temp/disable-winrm-and-shutdown.ps1',
+
       communicator: 'winrm',
       headless: 'false',
       winrm_username: winrm_username,
       winrm_password: winrm_password,
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
-
       winrm_timeout: '12h',
       floppy_files: [
         'files/autounattend.xml',
-        'scripts/install-boxstarter.ps1',
         'files/vm.boxstarter',
+        'scripts/enable-winrm.ps1',  // called by vm.boxstarter
+        'scripts/install-boxstarter.ps1',
+        'scripts/install-packages.ps1',  // called by vm.boxstarter
       ],
-    }],
-    provisioners: [
-      {
-        type: 'powershell',
-        scripts: ['scripts/cleanup.ps1', 'scripts/disable-winrm.ps1'],
-      },
-    ],
-  },
+    };
+
+    {
+      builders: [
+        common {
+          type: 'vmware-iso',
+          guest_os_type: guest_os_type_vmware,
+          disk_adapter_type: 'nvme',
+          snapshot_name: 'clean-install',
+          output_directory: 'output-vmware-' + vm_name,
+          vm_name: vm_name,
+          version: vmware_version,
+          vmx_data: vmx_data,
+        },
+      ],
+      provisioners: [
+        {
+          type: 'powershell',
+          scripts: ['scripts/cleanup.ps1'],
+        },
+        {
+          type: 'file',
+          source: 'scripts/disable-winrm-and-shutdown.ps1',
+          destination: 'c:/windows/temp/disable-winrm-and-shutdown.ps1',
+        },
+      ],
+    },
 
 }
