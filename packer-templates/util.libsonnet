@@ -15,6 +15,8 @@
       cpus: cpus,
       vm_name: vm_name,
 
+      disk_size: 100000, # ~100 GB
+
       boot_wait: '1s',
       boot_command: '<spacebar>',
 

@@ -22,3 +22,4 @@ Workstation 17.5.2 Pro.
 
 * Support for virtualbox
 * Automatically modify autounattend.xml as needed to call boxstarter, add TPM bypass
+* Allow different package lists for different VMs... somehow
