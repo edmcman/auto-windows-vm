@@ -9,13 +9,13 @@
       iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
     },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, memory=5120, cpus=2, vmware_version=21)
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=5120, cpus=2, vmware_version=21)
     local common = {
       memory: memory,
       cpus: cpus,
       vm_name: vm_name,
 
-      disk_size: 100000, # ~100 GB
+      disk_size: disk_size_mb,
 
       boot_wait: '1s',
       boot_command: '<spacebar>',
