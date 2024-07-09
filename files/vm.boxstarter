@@ -50,6 +50,19 @@ Function Apply-Settings {
 
     # Set app theme to dark
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0
+
+    # Enable verbose boot status
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -Value 1 -Type DWord
+
+    # Don't require login after sleep
+    # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-power
+    $TmpPath = "HKLM:\Software\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings" -Name "0e796bdb-100d-47d6-a2d5-f7d2daa51f51" -Force
+    Set-ItemProperty -Path "$TmpPath" -Name "ACSettingIndex" -Value 0 -Type DWord
+    Set-ItemProperty -Path "$TmpPath" -Name "DCSettingIndex" -Value 0 -Type DWord
+
+    
+
 }
 
 Apply-Settings
