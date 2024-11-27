@@ -124,6 +124,11 @@ Notes: Enter your comments here...
                     <Description>BypassRAMCheck</Description>
                     <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassRAMCheck" /t REG_DWORD /d 1</Path>
                 </RunSynchronousCommand>
+		<RunSynchronousCommand wcm:action="add">
+		  <Order>4</Order>
+		  <Description>EarlyScript</Description>
+		  <Path>powershell -ExecutionPolicy Bypass -File "a:\scripts\early.ps1"</Path>
+		</RunSynchronousCommand>
             </RunSynchronous>
         </component>
     </settings>
