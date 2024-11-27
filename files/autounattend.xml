@@ -211,7 +211,7 @@ Notes: Enter your comments here...
                 <SynchronousCommand wcm:action="add">
                     <Description>Run Early Scripts</Description>
                     <Order>1</Order>
-                    <CommandLine>powershell -ExecutionPolicy Bypass -File "a:\scripts\early.ps1"</CommandLine>
+                    <CommandLine>powershell -ExecutionPolicy Bypass -File "a:\earlyish.ps1"</CommandLine>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Description>Control Panel View</Description>

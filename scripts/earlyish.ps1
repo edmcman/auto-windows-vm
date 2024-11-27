@@ -2,4 +2,5 @@
 
 Write-Host "Early script"
 
-# a:\scripts\ed\zscaler-mitm.ps1
+# Disabled by default
+# a:\zscaler-mitm.ps1
