@@ -5,23 +5,23 @@ Function Install-Packages {
 
     # Development
 
-    choco install vscode
-    choco install git
-    choco install cmake
+    #choco install vscode
+    #choco install git
+    #choco install cmake
 
     # visual studio 2022 with c++
-    #choco install visualstudio2022community
-    choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
+    choco install visualstudio2022community
+    #choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
 
     # Browsers
 
-    choco install googlechrome
-    choco install foxitreader
+    #choco install googlechrome
+    #choco install foxitreader
 
     # Utilities
 
-    choco install windirstat
-    choco install sysinternals
+    #choco install windirstat
+    #choco install sysinternals
 
     # Productivity
 
@@ -67,14 +67,14 @@ Function Apply-Settings {
     Set-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "StartUpTab" -Value 5 -Type DWord
 }
 
-Apply-Settings
+#Apply-Settings
 
 Install-Packages
 
 # Updates
 
-Enable-MicrosoftUpdate
-Install-WindowsUpdate -Full
+#Enable-MicrosoftUpdate
+#Install-WindowsUpdate -Full
 
 # Remove page file
 # Source: https://github.com/mwrock/packer-templates/blob/master/scripts/package.ps1
