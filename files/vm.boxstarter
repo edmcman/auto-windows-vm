@@ -68,14 +68,15 @@ Function Apply-Settings {
 }
 
 # Updates
+# Need to update win10 before installing VS 2022?
 
-Enable-MicrosoftUpdate
-Install-WindowsUpdate -Full
+#Enable-MicrosoftUpdate
+#Install-WindowsUpdate -Full
 
 # need this?
 #Apply-Settings
 
-Install-Packages
+#Install-Packages
 
 
 # Remove page file
