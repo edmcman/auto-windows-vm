@@ -67,16 +67,15 @@ Function Apply-Settings {
     Set-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "StartUpTab" -Value 5 -Type DWord
 }
 
-# Updates
-
-Enable-MicrosoftUpdate
-Install-WindowsUpdate -Full
-
 # need this?
 #Apply-Settings
 
 Install-Packages
 
+# Updates
+
+#Enable-MicrosoftUpdate
+#Install-WindowsUpdate -Full
 
 # Remove page file
 # Source: https://github.com/mwrock/packer-templates/blob/master/scripts/package.ps1
