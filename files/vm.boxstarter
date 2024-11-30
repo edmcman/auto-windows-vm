@@ -5,7 +5,7 @@ Function Install-Packages {
 
     # Development
 
-    #choco install vscode
+    choco install vscode
     choco install git
     choco install cmake
 
