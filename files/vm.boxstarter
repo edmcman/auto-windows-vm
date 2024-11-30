@@ -10,8 +10,8 @@ Function Install-Packages {
     #choco install cmake
 
     # visual studio 2022 with c++
-    #choco install visualstudio2022community
-    choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
+    choco install visualstudio2022community
+    #choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
 
     # Browsers
 
@@ -67,7 +67,7 @@ Function Apply-Settings {
     Set-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "StartUpTab" -Value 5 -Type DWord
 }
 
-#Apply-Settings
+Apply-Settings
 
 Install-Packages
 
