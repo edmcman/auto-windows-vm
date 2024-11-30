@@ -87,4 +87,4 @@ Set-ItemProperty -Path $pageFileMemoryKey -Name PagingFiles -Value ""
 if (Test-PendingReboot) { Invoke-Reboot }
 
 # Enable WinRM to conclude packer provisioning process
-a:\enable-winrm.ps1
+#a:\enable-winrm.ps1
