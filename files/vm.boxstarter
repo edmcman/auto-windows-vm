@@ -68,7 +68,7 @@ Function Apply-Settings {
 }
 
 # need this?
-Apply-Settings
+#Apply-Settings
 
 Install-Packages
 
