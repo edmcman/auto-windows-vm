@@ -15,13 +15,13 @@ Function Install-Packages {
 
     # Browsers
 
-    choco install googlechrome
-    choco install foxitreader
+    #choco install googlechrome
+    #choco install foxitreader
 
     # Utilities
 
-    choco install windirstat
-    choco install sysinternals
+    #choco install windirstat
+    #choco install sysinternals
 
     # Productivity
 
