@@ -35,14 +35,14 @@
       winrm_password: winrm_password,
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
-      winrm_timeout: '2h',
+      winrm_timeout: '1h',
       floppy_files: [
         'files/autounattend.xml',
         'files/vm.boxstarter',
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
         'scripts/install-boxstarter.ps1',
         'scripts/earlyish.ps1',
-        //'scripts/ed/zscaler-mitm.ps1'
+        'scripts/ed/zscaler-mitm.ps1'
       ],
     };
 

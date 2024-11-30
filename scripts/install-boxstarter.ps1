@@ -1,5 +1,6 @@
 try {
-    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/mwrock/boxstarter/master/BuildScripts/bootstrapper.ps1'))
+
+    iex ((new-object net.webclient).DownloadString('https://boxstarter.org/bootstrapper.ps1'))
     Get-Boxstarter -Force
 
     $secpasswd = ConvertTo-SecureString "password" -AsPlainText -Force
