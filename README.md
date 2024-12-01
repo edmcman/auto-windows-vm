@@ -30,6 +30,10 @@ Workstation 17.5.2 Pro.
 # Todo
 
 * Support for virtualbox
-* Automatically modify autounattend.xml as needed to call boxstarter, add TPM bypass
+* Automatically modify autounattend.xml as needed to call boxstarter, add TPM bypass [using manifestXmlJsonml?](https://jsonnet.org/ref/stdlib.html)
 * Allow different package lists for different VMs... somehow
 * Add [GitHub Actions](https://github.com/jonashackt/vagrant-github-actions) to test the build for VirtualBox
+
+Observation: A lot of these issues could be solved by [generating multiple
+files](https://jsonnet.org/learning/getting_started.html) from a single jsonnet
+file.  We wouldn't be able to pipe the output, but that's probably okay.
