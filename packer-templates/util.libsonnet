@@ -42,7 +42,7 @@
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
         'scripts/install-boxstarter.ps1',
         'scripts/earlyish.ps1',
-        //'scripts/ed/zscaler-mitm.ps1'
+        'scripts/ed/zscaler-mitm.ps1'
       ],
     };
 
