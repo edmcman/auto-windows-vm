@@ -13,10 +13,14 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 You can adjust the settings and software installed by modifying the
 [files/vm.boxstarter](files/vm.boxstarter) file.
 
-## Zscaler
+You can also adjust the following parameters from the command line:
+* `vm_name`
+* `memory` (RAM in MiB)
+* `zscaler` (install Zscaler MitM certificate)
 
-If you need to install the Zscaler mitm certificate (if you don't know what this
-means, you don't), then use `jsonnet --tla-code zscaler=true ...`.
+To set these, add `--tla-code parameter=value` to the `jsonnet` command.  For
+example: `jsonnet --tla-code zscaler=true packer-templates/win10.jsonnet` will
+install the Zscaler MitM certificate.
 
 # Testing
 
