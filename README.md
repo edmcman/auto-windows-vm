@@ -13,6 +13,11 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 You can adjust the settings and software installed by modifying the
 [files/vm.boxstarter](files/vm.boxstarter) file.
 
+## Zscaler
+
+If you need to install the Zscaler mitm certificate (if you don't know what this
+means, you don't), then use `jsonnet --tla-code zscaler=true ...`.
+
 # Testing
 
 I have tested this on a Ubuntu 22.04.4 LTS host with Packer v1.11.1 and VMWare

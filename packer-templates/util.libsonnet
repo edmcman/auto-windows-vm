@@ -9,7 +9,7 @@
       iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
     },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=8*1024, cpus=2, vmware_version=21)
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=8*1024, cpus=2, vmware_version=21, zscaler=false)
     local common = {
       memory: memory,
       cpus: cpus,
@@ -40,10 +40,9 @@
         'files/autounattend.xml',
         'files/vm.boxstarter',
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
-        'scripts/install-boxstarter.ps1',
-        'scripts/earlyish.ps1',
-        'scripts/ed/zscaler-mitm.ps1'
-      ],
+        'scripts/install-boxstarter.ps1'
+      ] +
+      (if zscaler then ['scripts/ed/zscaler.ps1'] else []),
     };
 
     {
