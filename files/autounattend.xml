@@ -209,9 +209,9 @@ Notes: Enter your comments here...
             <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <Description>Run Early Scripts</Description>
+                    <Description>Run Zscaler script if it exists</Description>
                     <Order>1</Order>
-                    <CommandLine>powershell -ExecutionPolicy Bypass -File "a:\earlyish.ps1"</CommandLine>
+                    <CommandLine>powershell -ExecutionPolicy Bypass -File "a:\zscaler-mitm.ps1"</CommandLine>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Description>Control Panel View</Description>
