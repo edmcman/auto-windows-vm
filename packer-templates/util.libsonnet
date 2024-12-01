@@ -42,7 +42,7 @@
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
         'scripts/install-boxstarter.ps1'
       ] +
-      (if zscaler then ['scripts/ed/zscaler.ps1'] else []),
+      (if zscaler then ['scripts/ed/zscaler-mitm.ps1'] else []),
     };
 
     {
