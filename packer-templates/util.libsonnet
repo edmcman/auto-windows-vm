@@ -64,10 +64,13 @@
           accelerator: 'kvm',
           # need to install virtio drivers?
           # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.266-1/
-          # disk_interface: 'scsi',
           efi_boot: true,
           "boot_wait": "5s",
           "boot_command": [ "<enter>" ],
+          "qemuargs":
+          [
+            [ "-cdrom", "/home/ed/Code/auto-windows-vm/virtiso-win.iso" ]
+          ],
         }
       ],
       provisioners: [
