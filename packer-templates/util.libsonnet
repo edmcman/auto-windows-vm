@@ -9,7 +9,7 @@
       iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
     },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=8*1024, cpus=2, vmware_version=21, zscaler=false)
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=8*1024, cpus=2, vmware_version=21, zscaler=false, guest_os_type_virtualbox, vboxmanage=[])
     local common = {
       memory: memory,
       cpus: cpus,
@@ -54,8 +54,18 @@
           snapshot_name: 'clean-install',
           output_directory: 'output-vmware-' + vm_name,
           vm_name: vm_name,
+          firmware: 'efi',
           version: vmware_version,
           vmx_data: vmx_data,
+        },
+        common {
+          type: 'virtualbox-iso',
+          guest_os_type: guest_os_type_virtualbox,
+          output_directory: 'output-virtualbox-' + vm_name,
+          vm_name: vm_name,
+          firmware: 'efi',
+          vboxmanage: vboxmanage,
+          keep_registered: true,
         },
       ],
       provisioners: [

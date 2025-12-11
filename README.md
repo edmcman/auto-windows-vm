@@ -25,11 +25,28 @@ install the Zscaler MitM certificate.
 # Testing
 
 I have tested this on a Ubuntu 22.04.4 LTS host with Packer v1.11.1 and VMWare
-Workstation 17.5.2 Pro.
+Workstation 17.5.2 Pro. VirtualBox is now supported as a build target.
+
+To generate a VirtualBox-only build (or to explicitly choose a builder), use
+the `-only` flag when invoking `packer build`. For example, after generating
+the template with `jsonnet`:
+
+Fish:
+```
+packer build -only=virtualbox-iso (jsonnet packer-templates/win10.jsonnet | psub)
+```
+
+Bash:
+```
+packer build -only=virtualbox-iso <(jsonnet packer-templates/win10.jsonnet)
+```
+
+If you want to produce both VMware and VirtualBox images in one run, run
+`packer build` without the `-only` flag and both builders configured in
+the JSON template will be executed.
 
 # Todo
 
-* Support for virtualbox
 * Automatically modify autounattend.xml as needed to call boxstarter, add TPM bypass [using manifestXmlJsonml?](https://jsonnet.org/ref/stdlib.html)
 * Allow different package lists for different VMs... somehow
 * Add [GitHub Actions](https://github.com/jonashackt/vagrant-github-actions) to test the build for VirtualBox

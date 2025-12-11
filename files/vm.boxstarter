@@ -2,6 +2,7 @@ Function Install-Packages {
     # VM
 
     choco install vmware-tools
+    choco install virtualbox-guest-additions-guest.install
 
     # Development
 
