@@ -13,6 +13,9 @@ Function Install-Packages {
     #choco install visualstudio2022community
     choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
 
+    # Windows SDK for windbg
+    choco install windows-sdk-10.1
+
     # Browsers
 
     choco install googlechrome
@@ -21,7 +24,8 @@ Function Install-Packages {
     # Utilities
 
     choco install windirstat
-    choco install sysinternals
+    # sysinternals package often lags
+    choco install sysinternals --ignore-checksums
 
     # Productivity
 
@@ -73,8 +77,13 @@ Install-Packages
 
 # Updates
 
+Write-BoxstarterMessage "Enabling Microsoft Update"
+
 Enable-MicrosoftUpdate
-Install-WindowsUpdate -Full
+
+Write-BoxstarterMessage "Installing Updates"
+
+Boxstarter.WinConfig\Install-WindowsUpdate
 
 # Remove page file
 # Source: https://github.com/mwrock/packer-templates/blob/master/scripts/package.ps1
