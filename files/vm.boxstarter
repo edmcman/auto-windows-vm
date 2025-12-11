@@ -1,8 +1,15 @@
 Function Install-Packages {
     # VM
 
-    choco install vmware-tools
-    choco install virtualbox-guest-additions-guest.install
+    try {
+        . a:\vars.ps1
+        if ($null -ne $VMPACKAGE -and $VMPACKAGE -ne '') {
+            Write-BoxstarterMessage "Installing VMPACKAGE: $VMPACKAGE"
+            choco install $VMPACKAGE
+        }
+    } catch {
+        
+    }
 
     # Development
 

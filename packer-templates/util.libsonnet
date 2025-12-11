@@ -49,6 +49,9 @@
       builders: [
         common {
           type: 'vmware-iso',
+          floppy_content: {
+            "vars.ps1": "$VMPACKAGE = 'vmware-tools'\n"
+          }
           guest_os_type: guest_os_type_vmware,
           disk_adapter_type: 'nvme',
           snapshot_name: 'clean-install',
@@ -60,6 +63,9 @@
         },
         common {
           type: 'virtualbox-iso',
+          floppy_content: {
+            "vars.ps1": "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n"
+          }
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
           vm_name: vm_name,
