@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--*************************************************
 Windows 10 Answer File Generator
 Created using Windows AFG found at:
@@ -7,8 +8,6 @@ Installation Notes
 Location: 
 Notes: Enter your comments here...
 **************************************************-->
-
-<?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="windowsPE">
         <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
@@ -123,6 +122,11 @@ Notes: Enter your comments here...
                     <Order>3</Order>
                     <Description>BypassRAMCheck</Description>
                     <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassRAMCheck" /t REG_DWORD /d 1</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>4</Order>
+                    <Description>AllowUpgradesWithUnsupportedTPMOrCPU</Description>
+                    <Path>cmd /c reg add "HKLM\SYSTEM\Setup\MoSetup" /v "AllowUpgradesWithUnsupportedTPMOrCPU" /t REG_DWORD /d 1 /f</Path>
                 </RunSynchronousCommand>
             </RunSynchronous>
         </component>
