@@ -4,6 +4,10 @@
       iso_url: 'https://software-download.microsoft.com/download/sg/22000.194.210913-1444.co_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso',
       iso_checksum: 'e8b1d2a1a85a09b4bf6154084a8be8e3c814894a15a7bcf3e8e63fcfa9a528cb',
     },
+    win11_arm: {
+      iso_url: 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_a64fre_en-us.iso',
+      iso_checksum: '32cde0071ed8086b29bb6c8c3bf17ba9e3cdf43200537434a811a9b6cc2711a1',
+    },
     win10: {
       iso_url: 'https://software-download.microsoft.com/download/sg/19043.928.210409-1212.21h1_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso',
       iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
@@ -18,7 +22,7 @@
       disk_size: disk_size_mb,
 
       boot_wait: '1s',
-      boot_command: '<spacebar>',
+      boot_command: '<space><wait5><space>',
 
       iso_url: iso_url,
       iso_checksum: iso_checksum,
@@ -36,7 +40,7 @@
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
       winrm_timeout: '2h',
-      floppy_files: [
+      cd_files: [
         'files/autounattend.xml',
         'files/vm.boxstarter',
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
@@ -49,7 +53,7 @@
       builders: [
         common {
           type: 'vmware-iso',
-          floppy_content: {
+          cd_content: {
             "vars.ps1": "$VMPACKAGE = 'vmware-tools'\n"
           },
           guest_os_type: guest_os_type_vmware,
@@ -63,14 +67,22 @@
         },
         common {
           type: 'virtualbox-iso',
-          floppy_content: {
+          cd_content: {
             "vars.ps1": "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n"
           },
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
           vm_name: vm_name,
           firmware: 'efi',
-          vboxmanage: vboxmanage,
+          vboxmanage: vboxmanage + [
+            ["modifyvm", "{{.Name}}", "--usb-ohci=off"],
+            ["modifyvm", "{{.Name}}", "--usb-xhci=on"],
+            ["modifyvm", "{{.Name}}", "--keyboard=usb"],
+            ["modifyvm", "{{.Name}}", "--mouse=usb"],
+          ],
+          hard_drive_interface: 'sata',
+          iso_interface: 'sata',
+          usb: true,
           keep_registered: true,
         },
       ],
