@@ -40,7 +40,7 @@
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
       winrm_timeout: '2h',
-      cd_files: [
+      floppy_files: [
         'files/autounattend.xml',
         'files/vm.boxstarter',
         'scripts/enable-winrm.ps1',  // called by vm.boxstarter
@@ -53,7 +53,7 @@
       builders: [
         common {
           type: 'vmware-iso',
-          cd_content: {
+          floppy_content: {
             "vars.ps1": "$VMPACKAGE = 'vmware-tools'\n"
           },
           guest_os_type: guest_os_type_vmware,
@@ -62,12 +62,13 @@
           output_directory: 'output-vmware-' + vm_name,
           vm_name: vm_name,
           firmware: 'efi',
+          usb: true,
           version: vmware_version,
           vmx_data: vmx_data,
         },
         common {
           type: 'virtualbox-iso',
-          cd_content: {
+          floppy_content: {
             "vars.ps1": "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n"
           },
           guest_os_type: guest_os_type_virtualbox,
