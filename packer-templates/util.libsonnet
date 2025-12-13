@@ -1,8 +1,8 @@
 {
   params: {
     win11: {
-      iso_url: 'https://software-download.microsoft.com/download/sg/22000.194.210913-1444.co_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso',
-      iso_checksum: 'e8b1d2a1a85a09b4bf6154084a8be8e3c814894a15a7bcf3e8e63fcfa9a528cb',
+      iso_url: 'https://aka.ms/Win11E-ISO-25H2-en-us',
+      iso_checksum: 'sha256:a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9',
     },
     win11_arm: {
       iso_url: 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_a64fre_en-us.iso',
@@ -10,7 +10,7 @@
     },
     win10: {
       iso_url: 'https://software-download.microsoft.com/download/sg/19043.928.210409-1212.21h1_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso',
-      iso_checksum: '026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
+      iso_checksum: 'sha256:026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
     },
   },
   makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100*1024, memory=8*1024, cpus=2, vmware_version=21, zscaler=false, guest_os_type_virtualbox, vboxmanage=[])

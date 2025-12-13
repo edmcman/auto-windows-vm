@@ -89,6 +89,7 @@ Notes: Enter your comments here...
             </DiskConfiguration>
             <ImageInstall>
                 <OSImage>
+<InstallFrom><MetaData wcm:action="add"><Key>ImageName</Key><Value>Windows 11 Enterprise</Value></MetaData></InstallFrom>
                     <InstallTo>
                         <DiskID>0</DiskID>
                         <PartitionID>4</PartitionID>

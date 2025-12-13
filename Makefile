@@ -1,0 +1,2 @@
+files/autounattend-multi.xml: files/autounattend.xml
+	sed '/<InstallTo>/i <InstallFrom><MetaData wcm:action="add"><Key>ImageName</Key><Value>Windows 11 Enterprise</Value></MetaData></InstallFrom>' files/autounattend.xml > $@
