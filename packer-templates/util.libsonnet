@@ -80,16 +80,18 @@
             'usb_xhci.present': 'TRUE',
             'sata1.present': 'TRUE',
           },
-        } else {} +
-               {
-                 network: 'nat',
-                 snapshot_name: 'clean-install',
-                 output_directory: 'output-vmware-' + vm_name,
-                 vm_name: vm_name,
-                 firmware: 'efi',
-                 usb: true,
-                 version: vmware_version,
-               },
+        }
+        else
+          {} +
+          {
+            network: 'nat',
+            snapshot_name: 'clean-install',
+            output_directory: 'output-vmware-' + vm_name,
+            vm_name: vm_name,
+            firmware: 'efi',
+            usb: true,
+            version: vmware_version,
+          },
         common {
           type: 'virtualbox-iso',
           cd_content: {
