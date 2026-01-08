@@ -5,7 +5,7 @@ try {
     $secpasswd = ConvertTo-SecureString "password" -AsPlainText -Force
     $cred = New-Object System.Management.Automation.PSCredential ("ed", $secpasswd)
 
-    Install-BoxstarterPackage -PackageName a:\vm.boxstarter -Credential $cred
+    Install-BoxstarterPackage -PackageName e:\vm.boxstarter -Credential $cred
 } catch {
     New-Item -Path "C:\error.log" -ItemType "File" -Value "An error occurred: $_"
     Start-Sleep -Seconds 10
