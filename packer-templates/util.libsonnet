@@ -81,7 +81,6 @@
            vmx_data: vmware_vmx_data {
              'usb_xhci.present': 'TRUE',
            },
-           firmware: 'efi',
            usb: true,
 
          }
@@ -90,6 +89,7 @@
         {
           cdrom_adapter_type: 'sata',
           disk_adapter_type: 'nvme',
+          firmware: 'efi',
           //network: 'nat',
           snapshot_name: 'clean-install',
           output_directory: 'output-vmware-' + vm_name,
