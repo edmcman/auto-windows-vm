@@ -1,5 +1,7 @@
 {
   params: {
+    // This site is quite helpful for finding ISOs.
+    // https://ru.files.rg-adguard.net/file/a6329578-0cd5-4256-4377-fc8e82882184
     win11: {
       iso_url: 'https://aka.ms/Win11E-ISO-25H2-en-us',
       iso_checksum: 'sha256:a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9',
