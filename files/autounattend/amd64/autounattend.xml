@@ -215,7 +215,7 @@ Notes: Enter your comments here...
                 <SynchronousCommand wcm:action="add">
                     <Description>Run Zscaler script if it exists</Description>
                     <Order>1</Order>
-                    <CommandLine>powershell -ExecutionPolicy Bypass -File "a:\zscaler-mitm.ps1"</CommandLine>
+                    <CommandLine>powershell -ExecutionPolicy Bypass -File "e:\zscaler-mitm.ps1"</CommandLine>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Description>Control Panel View</Description>
@@ -237,7 +237,7 @@ Notes: Enter your comments here...
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Description>Run Boxstarter</Description>
-                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File a:\install-boxstarter.ps1</CommandLine>
+                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File e:\install-boxstarter.ps1</CommandLine>
                     <Order>5</Order>
                 </SynchronousCommand>
             </FirstLogonCommands>
