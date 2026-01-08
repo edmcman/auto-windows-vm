@@ -8,7 +8,7 @@ Function Install-Packages {
             choco install $VMPACKAGE
         }
     } catch {
-        
+        Write-BoxstarterMessage "Warning: Failed to load e:\vars.ps1 or install VMPACKAGE. Error: $($_.Exception.Message)"
     }
 
     # Development
