@@ -1,7 +1,15 @@
 Function Install-Packages {
     # VM
 
-    choco install vmware-tools
+    try {
+        . e:\vars.ps1
+        if ($null -ne $VMPACKAGE -and $VMPACKAGE -ne '') {
+            Write-BoxstarterMessage "Installing VMPACKAGE: $VMPACKAGE"
+            choco install $VMPACKAGE
+        }
+    } catch {
+        Write-BoxstarterMessage "Warning: Failed to load e:\vars.ps1 or install VMPACKAGE. Error: $($_.Exception.Message)"
+    }
 
     # Development
 
@@ -10,7 +18,6 @@ Function Install-Packages {
     choco install cmake
 
     # visual studio 2022 with c++
-    #choco install visualstudio2022community
     choco install visualstudio2022community --package-parameters "'--add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'"
 
     # Windows SDK for windbg
@@ -19,8 +26,6 @@ Function Install-Packages {
     # Browsers
 
     choco install googlechrome
-    choco install foxitreader
-
     # Utilities
 
     choco install windirstat
@@ -95,4 +100,4 @@ Set-ItemProperty -Path $pageFileMemoryKey -Name PagingFiles -Value ""
 if (Test-PendingReboot) { Invoke-Reboot }
 
 # Enable WinRM to conclude packer provisioning process
-a:\enable-winrm.ps1
+e:\enable-winrm.ps1
