@@ -11,9 +11,13 @@
       iso_checksum: 'sha256:32cde0071ed8086b29bb6c8c3bf17ba9e3cdf43200537434a811a9b6cc2711a1',
     },
     win10: {
-      iso_url: 'https://software-download.microsoft.com/download/sg/19043.928.210409-1212.21h1_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso',
-      iso_checksum: 'sha256:026607e7aa7ff80441045d8830556bf8899062ca9b3c543702f112dd6ffe6078',
+      iso_url: 'https://archive.org/download/windows_10_version_2004/Windows%2010%2C%20version%2022H2/Updated%20October%202025%20%2819045.6456%29/en-us_windows_10_business_editions_version_22h2_updated_oct_2025_x64_dvd_d2eef4b0.iso',
+      iso_checksum: 'sha256:2c23bc8b95a9314f15ebff881dcbea49651f52a96a0327d7aaf523aa66043765',
     },
+    win10_arm: {
+      iso_url: 'https://archive.org/download/windows_10_version_2004/Windows%2010%2C%20version%2022H2/Updated%20October%202025%20%2819045.6456%29/SW_DVD9_Win_Pro_10_22H2.36_Arm64_English_Pro_Ent_EDU_N_MLF_X24-17199.iso',
+      iso_checksum: 'sha256:351f80fa30b731e8ba3a333bf55b724905ee8970b08338c6f2d25add5acf37d3',
+    }
   },
   makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, zscaler=false, guest_os_type_virtualbox, vboxmanage=[])
     local isArm = guest_os_type_vmware == 'arm-windows11-64' || guest_os_type_virtualbox == 'Windows11_arm64';
@@ -128,6 +132,14 @@
           type: 'file',
           source: 'scripts/disable-winrm-and-shutdown.ps1',
           destination: 'c:/windows/temp/disable-winrm-and-shutdown.ps1',
+        },
+      ],
+      "post-processors": [
+        {
+          type: 'vagrant',
+          keep_input_artifact: true,
+          output: 'boxes/{{.BuildName}}-{{.Provider}}.box',
+          vagrantfile_template: 'packer-templates/Vagrantfile.template',
         },
       ],
     },
