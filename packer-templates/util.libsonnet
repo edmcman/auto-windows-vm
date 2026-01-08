@@ -61,12 +61,13 @@
 
     {
       builders: [
+        // VMware ISO builder
         common {
           type: 'vmware-iso',
 
 
           // add fusion drivers
-          cd_files+: (if isArm then ['files/arm64-drivers/*'] else []),
+          cd_files+: (if isArm then ['files/drivers/arm64-fusion/*'] else []),
 
           // TODO: Figure out how to install vmware-tools for fusion on arm
           cd_content: if isArm then {} else {
@@ -96,6 +97,7 @@
           vm_name: vm_name,
           version: vmware_version,
         },
+        // VirtualBox ISO builder
         common {
           type: 'virtualbox-iso',
           cd_content: {
