@@ -18,6 +18,9 @@
   makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, zscaler=false, guest_os_type_virtualbox, vboxmanage=[])
     local isArm = guest_os_type_vmware == 'arm-windows11-64' || guest_os_type_virtualbox == 'Windows11_arm64';
     local autounattend_path = if isArm then 'files/autounattend/arm64/autounattend.xml' else 'files/autounattend/amd64/autounattend.xml';
+    local vmware_vmx_data = vmx_data {
+      'sata1.present': 'TRUE',
+    };
     local common = {
       memory: memory,
       cpus: cpus,
@@ -61,6 +64,7 @@
         common {
           type: 'vmware-iso',
 
+
           // add fusion drivers
           cd_files+: (if isArm then ['files/arm64-drivers/*'] else []),
 
@@ -71,27 +75,27 @@
           guest_os_type: guest_os_type_vmware,
         } +
 
-        if isArm then {
-          // per https://github.com/hashicorp/packer-plugin-vmware/tree/main/example/iso#vmware-fusion-pro-on-apple-silicon
-          disk_adapter_type: 'nvme',
+        (if isArm then {
+           // per https://github.com/hashicorp/packer-plugin-vmware/tree/main/example/iso#vmware-fusion-pro-on-apple-silicon
+           network_adapter_type: 'vmxnet3',
+           vmx_data: vmware_vmx_data {
+             'usb_xhci.present': 'TRUE',
+           },
+           firmware: 'efi',
+           usb: true,
+
+         }
+         else
+           { vmx_data: vmware_vmx_data }) +
+        {
           cdrom_adapter_type: 'sata',
-          network_adapter_type: 'vmxnet3',
-          vmx_data: vmx_data {
-            'usb_xhci.present': 'TRUE',
-            'sata1.present': 'TRUE',
-          },
-        }
-        else
-          {} +
-          {
-            network: 'nat',
-            snapshot_name: 'clean-install',
-            output_directory: 'output-vmware-' + vm_name,
-            vm_name: vm_name,
-            firmware: 'efi',
-            usb: true,
-            version: vmware_version,
-          },
+          disk_adapter_type: 'nvme',
+          //network: 'nat',
+          snapshot_name: 'clean-install',
+          output_directory: 'output-vmware-' + vm_name,
+          vm_name: vm_name,
+          version: vmware_version,
+        },
         common {
           type: 'virtualbox-iso',
           cd_content: {
