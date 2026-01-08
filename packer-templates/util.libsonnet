@@ -138,7 +138,7 @@
         {
           type: 'vagrant',
           keep_input_artifact: true,
-          output: 'boxes/{{.BuildName}}-{{.Provider}}.box',
+          output: 'boxes/{{.Provider}}-%s.box' % vm_name,
           vagrantfile_template: 'packer-templates/Vagrantfile.template',
         },
       ],
