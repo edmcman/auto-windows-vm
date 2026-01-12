@@ -1,10 +1,10 @@
 local util = import 'util.libsonnet';
 
-function(vm_name='windows10', memory=5120, zscaler=false)
+function(vm_name='windows10', memory=5120, options={})
   util.makevm(vm_name=vm_name,
               guest_os_type_vmware='windows9-64',
               guest_os_type_virtualbox='Windows10_64',
               iso_url=util.params.win10.iso_url,
               iso_checksum=util.params.win10.iso_checksum,
               memory=memory,
-              zscaler=zscaler)
+              options=options)

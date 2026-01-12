@@ -1,14 +1,38 @@
+# Load variables
+. e:\vars.ps1
+
+if ($BoxstarterArgs -eq $null) {
+    Write-BoxstarterArgs "Expected to find BoxstarterArgs in vars.ps1"
+    throw "Expected to find BoxstarterArgs in vars.ps1"
+}
+
+# XXX: Maybe VMPACKAGE should also be parsed here?
+
+# Parse $BoxstarterArgs
+$params = Invoke-Expression @"
+& {
+  param(
+    [switch]`$EnableSSH
+  )
+  `$PSBoundParameters
+} $BoxstarterArgs
+"@
+
+# Put each argument in the global scope
+foreach ($k in $params.Keys) {
+    Set-Variable -Name $k -Value $params[$k] -Scope Global
+}
+
 Function Install-Packages {
     # VM
 
     try {
-        . e:\vars.ps1
         if ($null -ne $VMPACKAGE -and $VMPACKAGE -ne '') {
             Write-BoxstarterMessage "Installing VMPACKAGE: $VMPACKAGE"
             choco install $VMPACKAGE
         }
     } catch {
-        Write-BoxstarterMessage "Warning: Failed to load e:\vars.ps1 or install VMPACKAGE. Error: $($_.Exception.Message)"
+        Write-BoxstarterMessage "Warning: Failed install $VMPACKAGE. Error: $($_.Exception.Message)"
     }
 
     # Development
@@ -76,9 +100,25 @@ Function Apply-Settings {
     Set-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "StartUpTab" -Value 5 -Type DWord
 }
 
+Function Install-SSH {
+    dism /online /add-capability /capabilityname:OpenSSH.Server
+    Set-Service sshd -StartupType Automatic
+    Start-Service sshd
+}
+
 Apply-Settings
 
 Install-Packages
+
+# Install and enable OpenSSH Server if requested
+if ($EnableSSH) {
+    Write-BoxstarterMessage "Installing and enabling OpenSSH Server"
+    try {
+        Install-SSH
+    } catch {
+        Write-BoxstarterMessage "Warning: Failed to install or enable OpenSSH Server. Error: $($_.Exception.Message)"
+    }
+}
 
 # Updates
 

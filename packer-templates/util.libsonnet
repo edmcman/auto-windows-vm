@@ -17,14 +17,43 @@
     win10_arm: {
       iso_url: 'https://archive.org/download/windows_10_version_2004/Windows%2010%2C%20version%2022H2/Updated%20October%202025%20%2819045.6456%29/SW_DVD9_Win_Pro_10_22H2.36_Arm64_English_Pro_Ent_EDU_N_MLF_X24-17199.iso',
       iso_checksum: 'sha256:465109120d93738598faf72193193d66d6577278406f4ffa75642e472985a486',
-    }
+    },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, zscaler=false, guest_os_type_virtualbox, vboxmanage=[])
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, options={}, guest_os_type_virtualbox, vboxmanage=[])
+
     local isArm = guest_os_type_vmware == 'arm-windows11-64' || guest_os_type_virtualbox == 'Windows11_arm64';
     local autounattend_path = if isArm then 'files/autounattend/arm64/autounattend.xml' else 'files/autounattend/amd64/autounattend.xml';
+
     local vmware_vmx_data = vmx_data {
       'sata1.present': 'TRUE',
     };
+
+    local strictMerge(defaults, override) =
+      // Validate override keys
+      if std.length(
+        std.filter(
+          function(k) !std.objectHas(defaults, k),
+          std.objectFields(override)
+        )
+      ) > 0
+      then error 'Override contains unknown keys: ' +
+                 std.join(
+                   ', ',
+                   std.filter(
+                     function(k) !std.objectHas(defaults, k),
+                     std.objectFields(override)
+                   )
+                 )
+      else defaults + override;
+
+    local default_options = {
+      zscaler: false,
+      disable_winrm: true,
+      enable_sshd: false,
+    };
+
+    local all_options = strictMerge(default_options, options);
+
     local common = {
       memory: memory,
       cpus: cpus,
@@ -44,7 +73,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if all_options.disable_winrm then '-DisableWinRM' else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',
@@ -60,7 +89,7 @@
           'scripts/enable-winrm.ps1',  // called by vm.boxstarter
           'scripts/install-boxstarter.ps1',
         ] +
-        (if zscaler then ['scripts/ed/zscaler-mitm.ps1'] else []),
+        (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else []),
     };
 
     {
@@ -74,8 +103,11 @@
           cd_files+: (if isArm then ['files/drivers/arm64-fusion/*'] else []),
 
           // TODO: Figure out how to install vmware-tools for fusion on arm
-          cd_content: if isArm then {} else {
-            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n",
+          cd_content: if isArm then {
+            'vars.ps1': '$BoxstarterArgs = ' + (if all_options.enable_sshd then std.escapeStringBash('-EnableSSH') else '') + '\n',
+          } else {
+            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" +
+                        '$BoxstarterArgs = ' + (if all_options.enable_sshd then std.escapeStringBash('-EnableSSH') else '') + '\n',
           },
           guest_os_type: guest_os_type_vmware,
         } +
@@ -105,7 +137,8 @@
         common {
           type: 'virtualbox-iso',
           cd_content: {
-            'vars.ps1': "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n",
+            'vars.ps1': "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n" +
+                        '$BoxstarterArgs = ' + (if all_options.enable_sshd then std.escapeStringBash('-EnableSSH') else '') + '\n',
           },
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
@@ -134,7 +167,7 @@
           destination: 'c:/windows/temp/disable-winrm-and-shutdown.ps1',
         },
       ],
-      "post-processors": [
+      'post-processors': [
         {
           type: 'vagrant',
           keep_input_artifact: true,
