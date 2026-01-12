@@ -48,7 +48,7 @@
 
     local default_options = {
       zscaler: false,
-      disable_winrm: true,
+      enable_winrm: false,
       enable_sshd: false,
     };
 
@@ -73,7 +73,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if all_options.disable_winrm then '-DisableWinRM' else '') + "' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',

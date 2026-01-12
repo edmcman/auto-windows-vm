@@ -13,23 +13,23 @@ Bash: `packer build <(jsonnet packer-templates/win10.jsonnet)`
 You can adjust the settings and software installed by modifying the
 [files/vm.boxstarter](files/vm.boxstarter) file.
 
-You can also adjust the following parameters from the command line. Some are top-level TLA parameters passed directly to the template (for example `vm_name` and `memory`), while others are meant to be set inside the `options` object (for example `zscaler` and `disable_winrm`).
+You can also adjust the following parameters from the command line. Some are top-level TLA parameters passed directly to the template (for example `vm_name` and `memory`), while others are meant to be set inside the `options` object (for example `zscaler` and `enable_winrm`).
 
 Parameters:
 * `vm_name` — VM name (top-level TLA parameter)
 * `memory` (RAM in MiB) — top-level TLA parameter
 * `zscaler` (install Zscaler MitM certificate) — default: `false` (set via `options`)
-* `disable_winrm` (disable WinRM during shutdown) — default: `true` (set via `options`)
+* `enable_winrm` (leave WinRM enabled during shutdown) — default: `false` (set via `options`) 
 * `enable_sshd` (install and enable OpenSSH Server via Boxstarter) — default: `false` (set via `options`)
 
 To set top-level parameters, pass them using `--tla-code` (examples):
 `jsonnet --tla-code vm_name='customvm' --tla-code memory=8192 packer-templates/win10.jsonnet`
 
 To set `options`, pass an `options` object via `--tla-code` (example):
-`jsonnet --tla-code options='{zscaler: true, disable_winrm: false, enable_sshd: true}' packer-templates/win10.jsonnet`
+`jsonnet --tla-code options='{zscaler: true, enable_winrm: true, enable_sshd: true}' packer-templates/win10.jsonnet`
 
 You can combine both approaches in a single invocation:
-`jsonnet --tla-code vm_name='customvm' --tla-code memory=8192 --tla-code options='{zscaler: true, disable_winrm: false}' packer-templates/win10.jsonnet`
+`jsonnet --tla-code vm_name='customvm' --tla-code memory=8192 --tla-code options='{zscaler: true, enable_winrm: true}' packer-templates/win10.jsonnet`
 
 # Testing
 
