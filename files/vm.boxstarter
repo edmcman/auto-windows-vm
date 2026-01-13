@@ -1,6 +1,12 @@
 # Load variables
 . e:\vars.ps1
 
+# Prevent system sleep helper (SetThreadExecutionState P/Invoke)
+Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class S{[DllImport("kernel32.dll")] public static extern System.UInt32 SetThreadExecutionState(System.UInt32 esFlags);}'
+
+# Prevent sleep
+[void][S]::SetThreadExecutionState([uint32]::Parse("80000003", [System.Globalization.NumberStyles]::HexNumber))
+
 if ($BoxstarterArgs -eq $null) {
     Write-BoxstarterArgs "Expected to find BoxstarterArgs in vars.ps1"
     throw "Expected to find BoxstarterArgs in vars.ps1"
@@ -103,6 +109,14 @@ Function Apply-Settings {
 Function Install-SSH {
     dism /online /add-capability /capabilityname:OpenSSH.Server
     Set-Service sshd -StartupType Automatic
+
+    # Adjust the config so admin users can use their own authorized_keys file.
+    $cfg = "C:\ProgramData\ssh\sshd_config"
+    Copy-Item $cfg "$cfg.bak" -Force
+    (Get-Content $cfg) `
+        -replace '^\s*Match\s+Group\s+administrators\b', 'Match Group disabled' |
+        Set-Content $cfg -Encoding ascii
+
     Start-Service sshd
 }
 
