@@ -118,6 +118,18 @@ Function Install-SSH {
         Set-Content $cfg -Encoding ascii
 
     Start-Service sshd
+
+    $sshFirewallRuleName = "Allow-SSHD-Inbound-22-PrivatePublic"
+    if (-not (Get-NetFirewallRule -Name $sshFirewallRuleName -ErrorAction SilentlyContinue)) {
+        New-NetFirewallRule `
+            -Name $sshFirewallRuleName `
+            -DisplayName "Allow SSH (TCP 22) for Packer" `
+            -Direction Inbound `
+            -Action Allow `
+            -Protocol TCP `
+            -LocalPort 22 `
+            -Profile @("Private", "Public")
+    }
 }
 
 Apply-Settings
