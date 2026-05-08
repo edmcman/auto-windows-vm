@@ -6,5 +6,6 @@ function(vm_name='windows11', memory=5120, options={})
               guest_os_type_virtualbox='Windows11_64',
               iso_url=util.params.win11.iso_url,
               iso_checksum=util.params.win11.iso_checksum,
+              autounattend_path=util.params.win11.autounattend_path,
               memory=memory,
               options=options)
