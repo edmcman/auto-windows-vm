@@ -162,9 +162,6 @@
           headless: false,
           output_directory: 'output-qemu-' + vm_name,
           boot_wait: '3s',
-          cd_content: {
-            'vars.ps1': "$VMPACKAGE = 'qemu-virtio-driver'\n" + boxstarterArgsLine,
-          },
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
           qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time']],
