@@ -53,10 +53,14 @@
       zscaler: false,
       enable_winrm: false,
       enable_sshd: false,
+      cape: null,
     };
 
     local all_options = strictMerge(default_options, options);
+    local isCape = all_options.cape != null;
     local boxstarterArgsLine = '$BoxstarterArgs = ' + (if all_options.enable_sshd then '"-EnableSSH"' else "''") + '\n';
+    local boxstarterFile = if isCape then 'files/cape.boxstarter' else 'files/vm.boxstarter';
+    local boxstarterPackageLine = '$BoxstarterPackage = \'' + (if isCape then 'e:\\cape.boxstarter' else 'e:\\vm.boxstarter') + '\'\n';
 
     local common = {
       memory: memory,
@@ -86,10 +90,11 @@
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
       winrm_timeout: '2h',
-      cd_files: [autounattend_path, 'files/vm.boxstarter', 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
-                + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else []),
+      cd_files: [autounattend_path, boxstarterFile, 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
+                + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else [])
+                + (if isCape then ['scripts/install-cape-agent.ps1', 'scripts/set-static-ip.ps1'] else []),
       cd_content: {
-        'vars.ps1': boxstarterArgsLine,
+        'vars.ps1': boxstarterPackageLine + boxstarterArgsLine,
       },
     };
 
@@ -105,7 +110,7 @@
 
           // TODO: Figure out how to install vmware-tools for fusion on arm
           cd_content: if !isArm then {
-            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" + boxstarterArgsLine,
+            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" + boxstarterPackageLine + boxstarterArgsLine,
           },
           guest_os_type: guest_os_type_vmware,
         } +
@@ -126,7 +131,7 @@
           disk_adapter_type: 'nvme',
           firmware: 'efi',
           //network: 'nat',
-          snapshot_name: 'clean-install',
+          snapshot_name: if isCape then 'cape-ready' else 'clean-install',
           output_directory: 'output-vmware-' + vm_name,
           version: vmware_version,
         },
@@ -135,7 +140,7 @@
           type: 'virtualbox-iso',
           cd_content: {
             'vars.ps1': "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n" +
-                        boxstarterArgsLine,
+                        boxstarterPackageLine + boxstarterArgsLine,
           },
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
@@ -164,10 +169,17 @@
           boot_wait: '3s',
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
-          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time']],
+          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]],
         },
       ],
-      provisioners: [
+      provisioners:
+        (if isCape then [
+          {
+            type: 'powershell',
+            scripts: ['scripts/install-cape-agent.ps1'],
+          },
+        ] else [])
+        + [
         {
           type: 'powershell',
           scripts: ['scripts/cleanup.ps1'],
@@ -178,7 +190,7 @@
           destination: 'c:/windows/temp/disable-winrm-and-shutdown.ps1',
         },
       ],
-      'post-processors': [
+      'post-processors': if isCape then [] else [
         {
           type: 'vagrant',
           keep_input_artifact: true,

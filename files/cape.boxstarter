@@ -1,0 +1,218 @@
+# CAPEv2 Guest VM Boxstarter Package
+# Hardens Windows for malware analysis and installs required software
+
+# Load variables from CD
+. e:\vars.ps1
+
+Function Disable-UAC {
+    Write-BoxstarterMessage "Disabling UAC..."
+
+    # Disable UAC via registry
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 0 -Type DWord
+
+    # Disable consent prompts (set to "Allow" for elevation without prompting)
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value 0 -Type DWord
+}
+
+Function Disable-WindowsDefender {
+    Write-BoxstarterMessage "Disabling Windows Defender..."
+
+    # Disable via Group Policy registry keys
+    $defenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+    New-Item -Path $defenderPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $defenderPath -Name "DisableAntiSpyware" -Value 1 -Type DWord
+    Set-ItemProperty -Path $defenderPath -Name "DisableAntiVirus" -Value 1 -Type DWord
+
+    # Disable Real-time Protection
+    $rtpPath = "$defenderPath\Real-Time Protection"
+    New-Item -Path $rtpPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $rtpPath -Name "DisableRealtimeMonitoring" -Value 1 -Type DWord
+    Set-ItemProperty -Path $rtpPath -Name "DisableBehaviorMonitoring" -Value 1 -Type DWord
+    Set-ItemProperty -Path $rtpPath -Name "DisableOnAccessProtection" -Value 1 -Type DWord
+    Set-ItemProperty -Path $rtpPath -Name "DisableScanOnRealtimeEnable" -Value 1 -Type DWord
+
+    # Disable Windows Defender services
+    Set-Service -Name WinDefend -StartupType Disabled -ErrorAction SilentlyContinue
+    Set-Service -Name WdNisSvc -StartupType Disabled -ErrorAction SilentlyContinue
+
+    # Disable Windows Security Center notifications
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications" -Name "DisableNotifications" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+}
+
+Function Disable-WindowsFirewall {
+    Write-BoxstarterMessage "Disabling Windows Firewall..."
+    Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+}
+
+Function Disable-WindowsUpdate {
+    Write-BoxstarterMessage "Disabling Windows Update..."
+
+    # Disable Windows Update service
+    Set-Service -Name wuauserv -StartupType Disabled
+    Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+
+    # Disable Update Orchestrator Service
+    Set-Service -Name UsoSvc -StartupType Disabled -ErrorAction SilentlyContinue
+    Stop-Service -Name UsoSvc -Force -ErrorAction SilentlyContinue
+
+    # Disable via registry
+    $wuPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+    New-Item -Path $wuPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $wuPath -Name "NoAutoUpdate" -Value 1 -Type DWord
+}
+
+Function Disable-NetworkNoise {
+    Write-BoxstarterMessage "Disabling network noise services..."
+
+    # Disable Teredo
+    netsh interface teredo set state disabled
+
+    # Disable ISATAP
+    netsh interface isatap set state disabled
+
+    # Disable 6to4
+    netsh interface 6to4 set state disabled
+
+    # Disable LLMNR via registry (Group Policy)
+    $llmnrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+    New-Item -Path $llmnrPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $llmnrPath -Name "EnableMulticast" -Value 0 -Type DWord
+
+    # Disable Network Connectivity Status Indicator (NCSI)
+    $ncsiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator"
+    New-Item -Path $ncsiPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $ncsiPath -Name "NoActiveProbe" -Value 1 -Type DWord
+
+    # Disable WPAD
+    $wpadPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+    New-Item -Path $wpadPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $wpadPath -Name "WpadOverride" -Value 1 -Type DWord
+
+    # Restrict Internet Communication (disables NCSI, Error Reporting, etc.)
+    $restrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator"
+    New-Item -Path $restrictPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $restrictPath -Name "NoActiveProbe" -Value 1 -Type DWord
+}
+
+Function Disable-Telemetry {
+    Write-BoxstarterMessage "Disabling Windows telemetry..."
+
+    # Disable telemetry via GPO
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Type DWord -Force
+
+    # Disable Connected User Experiences and Telemetry service
+    Set-Service -Name DiagTrack -StartupType Disabled -ErrorAction SilentlyContinue
+    Stop-Service -Name DiagTrack -Force -ErrorAction SilentlyContinue
+
+    # Disable dmwappushservice
+    Set-Service -Name dmwappushservice -StartupType Disabled -ErrorAction SilentlyContinue
+    Stop-Service -Name dmwappushservice -Force -ErrorAction SilentlyContinue
+}
+
+Function Remove-WindowsAppsFromPath {
+    Write-BoxstarterMessage "Removing WindowsApps from PATH..."
+
+    # Remove Microsoft Store path to prevent Windows Store python stub from intercepting
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    $newPath = ($userPath -split ';' | Where-Object { $_ -notlike "*WindowsApps*" }) -join ';'
+    [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $newMachinePath = ($machinePath -split ';' | Where-Object { $_ -notlike "*WindowsApps*" }) -join ';'
+    [Environment]::SetEnvironmentVariable("Path", $newMachinePath, "Machine")
+}
+
+Function Install-Python32 {
+    Write-BoxstarterMessage "Installing 32-bit Python 3.10..."
+
+    # CRITICAL: Must use 32-bit Python for CAPE agent
+    choco install python310 --x86 --params "/InstallDir:C:\Python310-32"
+
+    # Add to PATH
+    $pythonPath = "C:\Python310-32"
+    $scriptsPath = "$pythonPath\Scripts"
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    [Environment]::SetEnvironmentVariable("Path", "$pythonPath;$scriptsPath;$machinePath", "Machine")
+    $env:Path = "$pythonPath;$scriptsPath;$env:Path"
+
+    # Install Pillow for screenshots
+    & "$pythonPath\python.exe" -m pip install --upgrade pip
+    & "$pythonPath\python.exe" -m pip install Pillow
+}
+
+Function Install-AnalysisTools {
+    Write-BoxstarterMessage "Installing analysis tools..."
+
+    # Browser for web-based malware
+    choco install googlechrome --ignore-checksums
+
+}
+
+Function Apply-CapeSettings {
+    Write-BoxstarterMessage "Applying CAPE-specific settings..."
+
+    # Boot to desktop
+    Set-StartScreenOptions -EnableBootToDesktop
+
+    # Show hidden files and extensions
+    Set-WindowsExplorerOptions `
+        -EnableShowHiddenFilesFoldersDrives `
+        -EnableShowProtectedOSFiles `
+        -EnableShowFileExtensions
+
+    # Disable auto-hide taskbar (left-aligned)
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value 0
+
+    # Dark theme
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0
+
+    # Disable sleep, screensaver, hibernate, monitor timeout
+    powercfg /change standby-timeout-ac 0
+    powercfg /change standby-timeout-dc 0
+    powercfg /change monitor-timeout-ac 0
+    powercfg /change monitor-timeout-dc 0
+    powercfg /change hibernate-timeout-ac 0
+    powercfg /change hibernate-timeout-dc 0
+
+    # Disable lock screen
+    $lockPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+    New-Item -Path $lockPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $lockPath -Name "NoLockScreen" -Value 1 -Type DWord
+
+    # Enable verbose boot status
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -Value 1 -Type DWord
+
+    # Enable AutoLogon (required for CAPE reboot analysis)
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "1" -Type String
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultUserName" -Value "ed" -Type String
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value "password" -Type String
+
+    # Remove page file (for faster snapshots)
+    $pageFileMemoryKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
+    Set-ItemProperty -Path $pageFileMemoryKey -Name PagingFiles -Value ""
+}
+
+# Main execution
+Write-BoxstarterMessage "=== CAPEv2 Guest VM Setup ==="
+
+# Security hardening (disable protective features for malware analysis)
+Disable-UAC
+Disable-WindowsDefender
+Disable-WindowsFirewall
+Disable-WindowsUpdate
+Disable-NetworkNoise
+Disable-Telemetry
+Remove-WindowsAppsFromPath
+
+# Install required software
+Install-Python32
+Install-AnalysisTools
+
+# Apply settings
+Apply-CapeSettings
+
+if (Test-PendingReboot) { Invoke-Reboot }
+
+# Enable WinRM to conclude packer provisioning process
+e:\enable-winrm.ps1
