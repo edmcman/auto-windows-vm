@@ -53,11 +53,11 @@
       zscaler: false,
       enable_winrm: false,
       enable_sshd: false,
-      cape: null,
+      cape: false,
     };
 
     local all_options = strictMerge(default_options, options);
-    local isCape = all_options.cape != null;
+    local isCape = all_options.cape;
     local boxstarterArgsLine = '$BoxstarterArgs = ' + (if all_options.enable_sshd then '"-EnableSSH"' else "''") + '\n';
     local boxstarterFile = if isCape then 'files/cape.boxstarter' else 'files/vm.boxstarter';
     local boxstarterPackageLine = '$BoxstarterPackage = \'' + (if isCape then 'e:\\cape.boxstarter' else 'e:\\vm.boxstarter') + '\'\n';

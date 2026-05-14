@@ -8,4 +8,4 @@ function(vm_name='cape-win10', memory=4096, options={})
               iso_checksum=util.params.win10.iso_checksum,
               autounattend_path=util.params.win10.autounattend_path,
               memory=memory,
-              options=options { cape: {} })
+              options=options { cape: true })
