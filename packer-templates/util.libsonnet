@@ -81,7 +81,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + "' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if isCape then ' -SetStaticIP' else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',
@@ -92,7 +92,7 @@
       winrm_timeout: '2h',
       cd_files: [autounattend_path, boxstarterFile, 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
                 + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else [])
-                + (if isCape then ['scripts/install-cape-agent.ps1', 'scripts/set-static-ip.ps1'] else []),
+                + (if isCape then ['scripts/install-cape-agent.ps1'] else []),
       cd_content: {
         'vars.ps1': boxstarterPackageLine + boxstarterArgsLine,
       },
