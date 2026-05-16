@@ -167,18 +167,16 @@
           accelerator: 'kvm',
           machine_type: 'q35',
           disk_interface: 'ide',
-          net_device: 'e1000e',
+          // Embed MAC in net_device instead of qemuargs to avoid clobbering Packer's default netdev setup.
+          // https://github.com/hashicorp/packer-plugin-qemu/issues/69#issuecomment-1099083063
+          net_device: if mac_address != null then 'e1000e,mac=' + mac_address else 'e1000e',
           format: 'qcow2',
           headless: false,
           output_directory: 'output-qemu-' + vm_name,
           boot_wait: '3s',
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
-          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]]
-                   + (if mac_address != null then [
-                       ['-device', 'e1000e,mac=' + mac_address + ',netdev=cape-net'],
-                       ['-netdev', 'user,id=cape-net'],
-                     ] else []),
+          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]],
         },
       ],
       provisioners:
