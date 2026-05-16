@@ -23,13 +23,16 @@
       autounattend_path: 'files/autounattend/arm64/autounattend.xml',
     },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, autounattend_path, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, options={}, guest_os_type_virtualbox, vboxmanage=[])
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, autounattend_path, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, options={}, guest_os_type_virtualbox, vboxmanage=[], mac_address=null, static_ip=null, gateway=null, prefix_length=24)
 
     local isArm = guest_os_type_vmware == 'arm-windows11-64' || guest_os_type_virtualbox == 'Windows11_arm64';
 
     local vmware_vmx_data = vmx_data {
       'sata1.present': 'TRUE',
-    };
+    } + (if mac_address != null then {
+      'ethernet0.address': mac_address,
+      'ethernet0.addressType': 'static',
+    } else {});
 
     local strictMerge(defaults, override) =
       // Validate override keys
@@ -53,10 +56,14 @@
       zscaler: false,
       enable_winrm: false,
       enable_sshd: false,
+      cape: false,
     };
 
     local all_options = strictMerge(default_options, options);
+    local isCape = all_options.cape;
     local boxstarterArgsLine = '$BoxstarterArgs = ' + (if all_options.enable_sshd then '"-EnableSSH"' else "''") + '\n';
+    local boxstarterFile = if isCape then 'files/cape.boxstarter' else 'files/vm.boxstarter';
+    local boxstarterPackageLine = '$BoxstarterPackage = \'' + (if isCape then 'e:\\cape.boxstarter' else 'e:\\vm.boxstarter') + '\'\n';
 
     local common = {
       memory: memory,
@@ -77,7 +84,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + "' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if static_ip != null then ' -StaticIP ' + static_ip + ' -Gateway ' + gateway + ' -PrefixLength ' + prefix_length else '') + (if mac_address != null then ' -Mac ' + mac_address else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',
@@ -86,10 +93,11 @@
       winrm_insecure: 'true',
       winrm_use_ssl: 'false',
       winrm_timeout: '2h',
-      cd_files: [autounattend_path, 'files/vm.boxstarter', 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
-                + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else []),
+      cd_files: [autounattend_path, boxstarterFile, 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
+                + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else [])
+                + (if isCape then ['scripts/install-cape-agent.ps1'] else []),
       cd_content: {
-        'vars.ps1': boxstarterArgsLine,
+        'vars.ps1': boxstarterPackageLine + boxstarterArgsLine,
       },
     };
 
@@ -105,7 +113,7 @@
 
           // TODO: Figure out how to install vmware-tools for fusion on arm
           cd_content: if !isArm then {
-            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" + boxstarterArgsLine,
+            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" + boxstarterPackageLine + boxstarterArgsLine,
           },
           guest_os_type: guest_os_type_vmware,
         } +
@@ -126,7 +134,7 @@
           disk_adapter_type: 'nvme',
           firmware: 'efi',
           //network: 'nat',
-          snapshot_name: 'clean-install',
+          snapshot_name: if isCape then 'cape-ready' else 'clean-install',
           output_directory: 'output-vmware-' + vm_name,
           version: vmware_version,
         },
@@ -135,7 +143,7 @@
           type: 'virtualbox-iso',
           cd_content: {
             'vars.ps1': "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n" +
-                        boxstarterArgsLine,
+                        boxstarterPackageLine + boxstarterArgsLine,
           },
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
@@ -145,7 +153,9 @@
             ['modifyvm', '{{.Name}}', '--usb-xhci=on'],
             ['modifyvm', '{{.Name}}', '--keyboard=usb'],
             ['modifyvm', '{{.Name}}', '--mouse=usb'],
-          ],
+          ] + (if mac_address != null then
+            [['modifyvm', '{{.Name}}', '--macaddress1', std.strReplace(mac_address, ':', '')]]
+          else []),
           hard_drive_interface: 'sata',
           iso_interface: 'sata',
           usb: true,
@@ -157,17 +167,26 @@
           accelerator: 'kvm',
           machine_type: 'q35',
           disk_interface: 'ide',
-          net_device: 'e1000e',
+          // Embed MAC in net_device instead of qemuargs to avoid clobbering Packer's default netdev setup.
+          // https://github.com/hashicorp/packer-plugin-qemu/issues/69#issuecomment-1099083063
+          net_device: if mac_address != null then 'e1000e,mac=' + mac_address else 'e1000e',
           format: 'qcow2',
           headless: false,
           output_directory: 'output-qemu-' + vm_name,
           boot_wait: '3s',
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
-          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time']],
+          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]],
         },
       ],
-      provisioners: [
+      provisioners:
+        (if isCape then [
+          {
+            type: 'powershell',
+            scripts: ['scripts/install-cape-agent.ps1'],
+          },
+        ] else [])
+        + [
         {
           type: 'powershell',
           scripts: ['scripts/cleanup.ps1'],
@@ -178,7 +197,7 @@
           destination: 'c:/windows/temp/disable-winrm-and-shutdown.ps1',
         },
       ],
-      'post-processors': [
+      'post-processors': if isCape then [] else [
         {
           type: 'vagrant',
           keep_input_artifact: true,
