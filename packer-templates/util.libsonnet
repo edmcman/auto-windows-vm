@@ -23,13 +23,16 @@
       autounattend_path: 'files/autounattend/arm64/autounattend.xml',
     },
   },
-  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, autounattend_path, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, options={}, guest_os_type_virtualbox, vboxmanage=[])
+  makevm: function(guest_os_type_vmware, iso_url, iso_checksum, autounattend_path, vm_name='ed-vm', winrm_username='ed', winrm_password='password', vmx_data={}, disk_size_mb=100 * 1024, memory=8 * 1024, cpus=2, vmware_version=21, options={}, guest_os_type_virtualbox, vboxmanage=[], mac_address=null, static_ip=null, gateway=null, prefix_length=24)
 
     local isArm = guest_os_type_vmware == 'arm-windows11-64' || guest_os_type_virtualbox == 'Windows11_arm64';
 
     local vmware_vmx_data = vmx_data {
       'sata1.present': 'TRUE',
-    };
+    } + (if mac_address != null then {
+      'ethernet0.address': mac_address,
+      'ethernet0.addressType': 'static',
+    } else {});
 
     local strictMerge(defaults, override) =
       // Validate override keys
@@ -81,7 +84,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if isCape then ' -SetStaticIP' else '') + "' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if static_ip != null then ' -StaticIP ' + static_ip + ' -Gateway ' + gateway + ' -PrefixLength ' + prefix_length else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',
@@ -150,7 +153,9 @@
             ['modifyvm', '{{.Name}}', '--usb-xhci=on'],
             ['modifyvm', '{{.Name}}', '--keyboard=usb'],
             ['modifyvm', '{{.Name}}', '--mouse=usb'],
-          ],
+          ] + (if mac_address != null then
+            [['modifyvm', '{{.Name}}', '--macaddress1', std.strReplace(mac_address, ':', '')]]
+          else []),
           hard_drive_interface: 'sata',
           iso_interface: 'sata',
           usb: true,
@@ -170,7 +175,7 @@
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
           qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]],
-        },
+        } + (if mac_address != null then { mac_address: mac_address } else {}),
       ],
       provisioners:
         (if isCape then [
