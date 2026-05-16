@@ -5,14 +5,20 @@ Param(
     [Switch]$DisableWinRM,
     [string]$StaticIP    = '',
     [string]$Gateway     = '',
-    [int]$PrefixLength   = 24
+    [int]$PrefixLength   = 24,
+    [string]$Mac         = ''
 )
 
 Start-Sleep -Seconds 15
 
 if ($StaticIP -ne '') {
     Write-Host "Configuring static IP for CAPE analysis network"
-    $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notlike '*Loopback*' } | Select-Object -First 1
+    $adapter = if ($Mac -ne '') {
+        $macFormatted = ($Mac -replace ':', '-').ToUpper()
+        Get-NetAdapter | Where-Object { $_.MacAddress -eq $macFormatted } | Select-Object -First 1
+    } else {
+        Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notlike '*Loopback*' } | Select-Object -First 1
+    }
     if ($adapter) {
         Remove-NetIPAddress -InterfaceIndex $adapter.ifIndex -Confirm:$false -ErrorAction SilentlyContinue
         Remove-NetRoute -InterfaceIndex $adapter.ifIndex -Confirm:$false -ErrorAction SilentlyContinue

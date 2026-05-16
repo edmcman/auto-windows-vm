@@ -84,7 +84,7 @@
       // turned off.  Additionally, vmware fusion seems more sensitive to being
       // disconnected while running the shutdown command, so we use CIM to run
       // the script in the background.
-      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if static_ip != null then ' -StaticIP ' + static_ip + ' -Gateway ' + gateway + ' -PrefixLength ' + prefix_length else '') + "' }\"",
+      shutdown_command: "powershell -Command \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = 'powershell.exe -ExecutionPolicy Bypass -File C:/windows/temp/disable-winrm-and-shutdown.ps1 " + (if !all_options.enable_winrm then '-DisableWinRM' else '') + (if static_ip != null then ' -StaticIP ' + static_ip + ' -Gateway ' + gateway + ' -PrefixLength ' + prefix_length else '') + (if mac_address != null then ' -Mac ' + mac_address else '') + "' }\"",
 
       communicator: 'winrm',
       headless: 'false',
@@ -174,8 +174,12 @@
           boot_wait: '3s',
           efi_firmware_code: '/usr/share/OVMF/OVMF_CODE_4M.ms.fd',
           efi_firmware_vars: '/usr/share/OVMF/OVMF_VARS_4M.ms.fd',
-          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]],
-        } + (if mac_address != null then { mac_address: mac_address } else {}),
+          qemuargs: [['-cpu', 'host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time' + (if isCape then ',-hypervisor' else '')]]
+                   + (if mac_address != null then [
+                       ['-device', 'e1000e,mac=' + mac_address + ',netdev=cape-net'],
+                       ['-netdev', 'user,id=cape-net'],
+                     ] else []),
+        },
       ],
       provisioners:
         (if isCape then [
