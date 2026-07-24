@@ -214,5 +214,7 @@ Apply-CapeSettings
 
 if (Test-PendingReboot) { Invoke-Reboot }
 
+e:\disable-update-clients.ps1
+
 # Enable WinRM to conclude packer provisioning process
 e:\enable-winrm.ps1

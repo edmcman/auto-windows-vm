@@ -1,2 +1,2 @@
-output-vmware-*
-output-virtualbox-*
+packer.log
+output-*

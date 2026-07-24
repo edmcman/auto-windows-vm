@@ -95,10 +95,14 @@
       winrm_timeout: '2h',
       cd_files: [autounattend_path, boxstarterFile, 'scripts/enable-winrm.ps1', 'scripts/install-boxstarter.ps1']
                 + (if all_options.zscaler then ['scripts/ed/zscaler-mitm.ps1'] else [])
-                + (if isCape then ['scripts/install-cape-agent.ps1'] else []),
+                + (if isCape then ['scripts/install-cape-agent.ps1', 'scripts/disable-update-clients.ps1'] else []),
       cd_content: {
         'vars.ps1': boxstarterPackageLine + boxstarterArgsLine,
       },
+    };
+
+    local withVmPackage(package) = common.cd_content {
+      'vars.ps1': "$VMPACKAGE = '%s'\n" % package + super['vars.ps1'],
     };
 
     {
@@ -112,9 +116,7 @@
           cd_files+: (if isArm then ['files/drivers/arm64-fusion/*'] else []),
 
           // TODO: Figure out how to install vmware-tools for fusion on arm
-          cd_content: if !isArm then {
-            'vars.ps1': "$VMPACKAGE = 'vmware-tools'\n" + boxstarterPackageLine + boxstarterArgsLine,
-          },
+          cd_content: if !isArm then withVmPackage('vmware-tools') else common.cd_content,
           guest_os_type: guest_os_type_vmware,
         } +
 
@@ -141,10 +143,7 @@
         // VirtualBox ISO builder
         common {
           type: 'virtualbox-iso',
-          cd_content: {
-            'vars.ps1': "$VMPACKAGE = 'virtualbox-guest-additions-guest.install'\n" +
-                        boxstarterPackageLine + boxstarterArgsLine,
-          },
+          cd_content: withVmPackage('virtualbox-guest-additions-guest.install'),
           guest_os_type: guest_os_type_virtualbox,
           output_directory: 'output-virtualbox-' + vm_name,
           firmware: 'efi',
